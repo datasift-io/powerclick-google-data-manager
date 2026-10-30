@@ -1,5 +1,7 @@
 homepage: "https://powerclick.io"
 documentation: "https://github.com/datasift-io/powerclick-google-data-manager#readme"
 versions:
+  - sha: f39b9d2097b09411907cc38da5ac07d4a9d0a47b
+    changeNotes: Adds the PowerClick icon.
   - sha: b5ce253510110ee5673c5f5bcaf428ee817b8d3d
     changeNotes: Initial release.
