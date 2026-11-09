@@ -1,6 +1,8 @@
 homepage: "https://powerclick.io"
 documentation: "https://github.com/datasift-io/powerclick-google-data-manager#readme"
 versions:
+  - sha: 7ee175565a7b357536e23a64aa2147d47eae5ebd
+    changeNotes: Stays within GTM's 100-field limit: the PowerClick tenant id and event name are top-level fields; the Spore ID fallback field is removed (the cookie is read automatically).
   - sha: f39b9d2097b09411907cc38da5ac07d4a9d0a47b
     changeNotes: Adds the PowerClick icon.
   - sha: b5ce253510110ee5673c5f5bcaf428ee817b8d3d
