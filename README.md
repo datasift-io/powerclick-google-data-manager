@@ -10,7 +10,7 @@ A modified version of [stape-io/google-conversion-events-tag](https://github.com
 Apache License 2.0, at commit `ee54d37` (2026-07-23). Stape's settings and behaviour are unchanged; see Stape's
 documentation for the Google Ads (Data Manager API) setup. Changes:
 
-- A **PowerClick** field group: **PowerClick Tenant ID**, **PowerClick Event Name (optional)**, **PowerClick Spore ID fallback (optional)**.
+- A **PowerClick** field group: **PowerClick Tenant ID**, **PowerClick Event Name (optional)**.
 - After the Google Ads (Data Manager API) request, one POST of the response to `https://ingest.powerclick.io` for your account.
 - Permissions: *Sends HTTP requests* adds `https://ingest.powerclick.io/*`; *Reads cookies* adds `__spore_id`.
 - Name and brand: PowerClick. Stape's tests are not included (they assert Stape's exact requests).

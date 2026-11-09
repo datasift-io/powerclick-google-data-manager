@@ -1589,33 +1589,18 @@ ___TEMPLATE_PARAMETERS___
     ]
   },
   {
-    "type": "GROUP",
-    "name": "powerclickGroup",
-    "displayName": "PowerClick",
-    "groupStyle": "ZIPPY_OPEN",
-    "subParams": [
-      {
-        "type": "TEXT",
-        "name": "clicksporeTenantId",
-        "displayName": "PowerClick Tenant ID",
-        "simpleValueType": true,
-        "help": "Your PowerClick tenant id. Required \u2014 without it the CAPI response is not logged to PowerClick."
-      },
-      {
-        "type": "TEXT",
-        "name": "customEventName",
-        "displayName": "PowerClick Event Name (optional)",
-        "simpleValueType": true,
-        "help": "Overrides the event name shown in PowerClick (e.g. 'Purchase'). Blank = the platform event name."
-      },
-      {
-        "type": "TEXT",
-        "name": "sporeId",
-        "displayName": "PowerClick Spore ID fallback (optional)",
-        "simpleValueType": true,
-        "help": "Tried LAST. Map a store-backed variable (e.g. {{sjo.spore_id(coalesce)}}) ONLY on cross-domain checkout/purchase tags, where the __spore_id cookie and storefront event data are gone. Leave blank elsewhere."
-      }
-    ]
+    "type": "TEXT",
+    "name": "clicksporeTenantId",
+    "displayName": "PowerClick Tenant ID",
+    "simpleValueType": true,
+    "help": "Your PowerClick tenant id. Required \u2014 without it the CAPI response is not logged to PowerClick."
+  },
+  {
+    "type": "TEXT",
+    "name": "customEventName",
+    "displayName": "PowerClick Event Name (optional)",
+    "simpleValueType": true,
+    "help": "Overrides the event name shown in PowerClick (e.g. 'Purchase'). Blank = the platform event name."
   }
 ]
 
@@ -2709,13 +2694,9 @@ function logToPowerClick(data, mappedData, result) {
         source_event: sourceName,
         event_name: data.customEventName || mappedName,
         event_id: ev.transactionId || eventData.transaction_id || eventData.event_id,
-        // PowerClick attribution match key. The event's own sources win; data.sporeId is the LAST
-        // fallback, so it only fills the blank on cross-domain checkout-sandbox events where the
-        // __spore_id cookie + storefront dataLayer are gone. Storefront hits (incl. lp_view, where
-        // the id is minted and the store isn't written yet) carry spore_id in event data and need NO
-        // field — map data.sporeId ONLY on the cross-domain tags. It's a match key (resolves a journey
-        // or not), not an unverifiable claim, so recovering it from the store is honest.
-        spore_id: eventData.spore_id || (eventData.sjo && eventData.sjo.spore_id) || eventData['x-sp-spore_id'] || getCookieValues('__spore_id')[0] || data.sporeId || '',
+        // PowerClick attribution match key: event data, then sjo, then the __spore_id cookie. (The "Spore ID
+        // fallback" field was removed 2026-10-30: Stape's template has 98 of GTM's 100 fields.)
+        spore_id: eventData.spore_id || (eventData.sjo && eventData.sjo.spore_id) || eventData['x-sp-spore_id'] || getCookieValues('__spore_id')[0] || '',
         // Google's equivalent of fbc — first non-empty of gclid / gbraid / wbraid / dclid. These are
         // the click IDs ACTUALLY SENT to Google on this request (from adIdentifiers), so click_id is a
         // truthful record of the send, not an unverifiable store guess.
@@ -3171,20 +3152,10 @@ function log(rawDataToLog) {
  *                 PowerClick logging on this tag instance)."
  *
  * FIELD 2: customEventName (text)
- *   - Type: Text input
- *   - Display name: "PowerClick Event Name"
- *   - Help text: "Override event name in PowerClick /capi dashboard
- *                 (e.g., 'Purchase', 'Lead'). If blank, uses the Google
- *                 conversion event name from the events array."
+ *   - Display name: "PowerClick Event Name (optional)"
+ *   - Override event name in PowerClick /capi; blank = the mapped Google event name.
  *
- * FIELD 3: sporeId (text) — cross-domain FALLBACK, map ONLY on checkout/purchase tags
- *   - Type: Text input
- *   - Display name: "PowerClick Spore ID (store lookup)"
- *   - Map to a durable store-backed variable, e.g. {{sjo.spore_id(coalesce)}}
- *   - Help text: "Fallback (tried LAST): fills spore_id only on bottom-of-funnel events
- *                 (checkout/purchase) that fire in the Shopify web-pixel sandbox, where the
- *                 __spore_id cookie + storefront dataLayer are gone. Storefront tags carry
- *                 spore_id in event data already — leave empty there. Map ONLY on cross-domain tags."
+ * (No PowerClick group and no Spore ID fallback field: Stape's template has 98 of GTM's 100 fields, 2026-10-30.)
  *
  * DATA SENT TO POWERCLICK (per event in the batch):
  *   - type:           'capi_response'
@@ -3192,7 +3163,7 @@ function log(rawDataToLog) {
  *   - source_event:   eventData.event_name (the trigger event name)
  *   - event_name:     customEventName || mapped Google event name
  *   - event_id:       transactionId (Google's dedup identifier)
- *   - spore_id:       event data / sjo / cookie, then the sporeId store field (cross-domain only)
+ *   - spore_id:       event data / sjo / cookie
  *   - click_id:       gclid || gbraid || wbraid || dclid — the click IDs ACTUALLY SENT to Google on
  *                     this request (from mappedData.events[i].adIdentifiers), so it's a truthful
  *                     record of the send, not an unverifiable store guess. No store-backfill needed.
